@@ -12,3 +12,6 @@ tese.glo
 tese.lof
 tese.los
 tese.lot
+
+/.vscode/
+.latexmkrc/
