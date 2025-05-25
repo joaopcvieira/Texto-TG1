@@ -1,0 +1,190 @@
+Este capítulo apresenta os fundamentos que sustentam o emprego de \textbf{Redes Bayesianas de Crenças (\emph{Bayesian Belief Networks} — BBNs)} na mitigação de riscos em projetos aeroespaciais e descreve os procedimentos de elicitação de probabilidades utilizados na modelagem desses riscos. A abordagem adotada integra tanto conhecimentos teóricos extraídos da literatura quanto práticas de engenharia fundamentadas na experiência com análise de riscos em ambientes de alta complexidade e incerteza.
+
+
+% ALTERAR ISSO AQUI
+Nos últimos vinte anos, a indústria aeroespacial testemunhou incidentes emblemáticos—como os acidentes do *Mars Climate Orbiter* (1999) e do *Ariane 5* Flight 501 (1996)—que evidenciaram a necessidade de sistemas formais de avaliação de risco capazes de abarcar tanto incertezas epistemológicas quanto variabilidades aleatórias. Nesse contexto, modelos probabilísticos estruturados, como as BBNs, tornaram‑se ferramentas centrais em organizações como a NASA, a ESA e a JAXA, pois permitem integrar conhecimentos provenientes de simulações, testes laboratoriais e julgamento de especialistas, entregando uma visão holística dos cenários de falha \cite{banerjee2020risk, nasa2022safety}.
+
+
+
+
+\section{Bayesian Belief Networks (BBNs)}
+\label{sec:bbn}
+As BBNs são modelos probabilísticos, em forma de grafos, capazes de representar, de forma compacta, relações de dependência entre variáveis. Sua principal vantagem reside na integração de dados qualitativos e quantitativos, bem como na atualização dinâmica das crenças à medida que novas evidências surgem.
+
+
+Além de seu poder de representação, as BBNs destacam‑se pela capacidade de **inferência causal**: por meio do mecanismo de propagação de crenças, é possível estimar a probabilidade de eventos de alto nível—por exemplo, perda de missão—condicionada a combinações específicas de falhas de subsistemas. Essa característica é particularmente valiosa em projetos aeroespaciais, nos quais os modos de falha apresentam relações hierárquicas profundas e interdependentes \cite{pearl1988probabilistic}.
+
+\subsection{Teorema de Bayes}
+\label{subsec:bayes}
+A base matemática das BBNs é o Teorema de Bayes, expresso por
+\begin{equation}
+  P(A\mid B) = \frac{P(B\mid A)\,P(A)}{P(B)},
+  \label{eq:bayes}
+\end{equation}
+em que $P(A)$ é a probabilidade \emph{a priori} do evento $A$; $P(B\mid A)$, a probabilidade condicional de $B$ dado $A$; e $P(A\mid B)$, a probabilidade \emph{a posteriori}, isto é, a crença atualizada em $A$ após a observação de $B$. Esse mecanismo de inferência permite incorporar conhecimento novo ao longo do ciclo de vida de um projeto aeroespacial.
+
+De maneira prática, o Teorema de Bayes possibilita que evidências parciais, obtidas em diferentes etapas de desenvolvimento—ensaios estruturais, campanhas de vibração ou voos de qualificação—sejam incorporadas continuamente, refinando a rede. Dessa forma, o modelo acompanha a maturação do projeto (\emph{design maturation}) e promove *decision‑making* baseado em dados atualizados, ao contrário de análises de risco estáticas elaboradas apenas na fase preliminar.
+
+
+
+
+\subsection{Topologia da Rede e Tabelas de Probabilidade Condicional}
+\label{subsec:estrutura}
+A estrutura de uma BBN é definida por um grafo direcionado acíclico (DAG), no qual cada nó representa uma variável (ou fator de risco) e os arcos indicam relações de dependência condicional entre essas variáveis. A configuração da topologia reflete o conhecimento sobre a causalidade e a independência entre os elementos do sistema.
+
+
+Cada nó da rede é acompanhado de uma Tabela de Probabilidade Condicional (CPT – Conditional Probability Table), a qual especifica as probabilidades de ocorrência dos estados do nó em função dos estados dos seus nós pais. Dessa forma, a probabilidade conjunta do sistema é construída através do produto das probabilidades condicionais, permitindo a decomposição e simplificação do cálculo das probabilidades de eventos complexos
+
+
+Outro conceito fundamental é a \emph{d-separation}, que define independências condicionais a partir da topologia. Através dela, algoritmos como \emph{variable elimination} e \emph{junction tree} exploram a esparsidade do grafo para tornar a inferência viável em redes com centenas de nós. Em aplicações aeroespaciais, isso se traduz em tempos de resposta compatíveis com ciclos de revisão de requisitos e \emph{reviews} de segurança \cite{korb2010bayesian}.
+
+\begin{figure}[H]
+  \centering
+  % Substitua o arquivo abaixo pela imagem correspondente.
+  \includegraphics[width=0.5\textwidth]{Cap2/bbn_networks.png}
+  \caption{Exemplo de rede simples com o nó $X_c$ e seus pais $X_{p1}$ e $X_{p2}$. Cada nó possui uma CPT que define, para cada um de seus possíveis estados ($E_1$ e $E_2$), as probabilidades ($P_1$ e $P_2$) equivalentes.}
+  \label{fig:exemplo_bbn}
+\end{figure}
+
+Em um grafo comum, um arco entre um nó pai e um nó filho, como representado na Figura \ref{fig:exemplo_bbn}, pode ser interpretado de diferentes maneiras, em que uma das seguintes relações é verdadeira \cite{9}:
+\begin{itemize}
+  \item \textbf{Causalidade direta}: o estado do nó pai influencia diretamente o estado do nó filho.
+  \item \textbf{Causalidade indireta}: o estado do nó pai influencia indiretamente o estado do nó filho.
+  \item \textbf{Visão imperfeita}: o nó pai reflete uma visão incompleta do estado do nó filho, sem relação causal direta.
+  \item \textbf{Correlação estatística}: o estado do nó pai está correlacionado com o estado do nó filho, mas pode não haver uma relação causal direta.
+
+\end{itemize}
+
+Em uma rede BBN, entretanto, busca-se montar uma topologia (i.e., escolher os fatores relevantes e correlacioná-los), de maneira que os arcos representem relações de dependência causal. Essa abordagem permite que a rede possa ser iterada a partir do teorema de Bayes \ref{eq:bayes}. Como resultado, a probabilidade de um evento complexo (nó filho) pode ser expressa como o produto das probabilidades condicionais dos eventos que o compõem.
+
+Uma propriedade fundamental das BBNs é que os sucessores imediatos de um nó devem ser \emph{condicionalmente independentes} dado esse nó. Caso a rede não satisfaça essa condição, é um indicativo de que deve ser introduzido um \emph{nó oculto}. \cite{19} A inclusão desse nó intermediário — técnica conhecida como \emph{node divorcing} — restaura a independência condicional entre os sucessores e preserva a consistência probabilística da topologia.
+
+
+
+
+\subsection{Natureza das Variáveis}
+
+As BBNs podem ser classificadas de acordo com a natureza das variáveis representadas:
+
+
+\begin{itemize}
+  \label{subsec:variaveis}
+  \item \textbf{BBNs discretas}: São aquelas em que todas as variáveis assumem um conjunto finito de estados. Essa abordagem é bastante comum em aplicações práticas, pois permite a definição clara de categorias (por exemplo, “alto”, “médio” e “baixo” risco) e facilita a elicitação de probabilidades. A discretização, entretanto, pode acarretar perda de precisão quando a variável originalmente contínua é transformada em uma variável categórica.
+
+  \item \textbf{BBNs contínuas}:  Para modelar variáveis contínuas, utilizam-se funções de densidade de probabilidade e métodos de inferência baseados em distribuições contínuas. Embora esse tipo de BBN permita uma representação mais precisa dos fenômenos, a sua implementação demanda maior poder computacional e métodos avançados para o cálculo das integrais envolvidas na inferência.
+
+  \item \textbf{BBNs híbridas}: Combinam variáveis discretas e contínuas, permitindo uma modelagem mais flexível e realista de sistemas complexos. Essa abordagem é especialmente útil em contextos onde variáveis operacionais contínuas (como temperatura ou pressão) interagem com estados discretos (como “ativo” ou “inativo”).
+
+\end{itemize}
+
+Embora a maioria das ferramentas comerciais trate apenas redes puramente discretas ou puramente contínuas, avanços recentes em \emph{redes híbridas} permitem combinar ambas as representações. Essa flexibilidade é crucial para capturar variáveis operacionais contínuas—temperatura de tanque criogênico, pressão de motor—ao lado de estados discretos—\emph{válvula aberta/fechada}. Para projetos que se estendem por vários anos, considerar essa nuance pode evitar simplificações excessivas que mascaram riscos relevantes \cite{lerner2021hybrid}.
+
+
+
+
+
+\subsection{Origem dos Parâmetros}
+Outra classificação relevante para as BBNs diz respeito à origem dos parâmetros que alimentam as tabelas condicionais:
+
+
+\label{subsec:parametros}
+\begin{itemize}
+  \item \textbf{Data‑driven}: Nesse modelo, as probabilidades são extraídas ou estimadas a partir de grandes volumes de dados empíricos. O uso de técnicas de aprendizado automático (como machine learning) possibilita a construção da rede de forma automatizada, ajustando os parâmetros com base em conjuntos de dados históricos ou experimentais. Essa abordagem é vantajosa quando há disponibilidade de dados robustos e confiáveis.
+
+
+  \item \textbf{Expert‑driven}: Em cenários onde os dados são escassos ou insuficientes, a experiência e o conhecimento dos especialistas são fundamentais para a definição da estrutura e dos parâmetros da rede. A elicitação de julgamentos de especialistas permite que as BBNs incorporem nuances e fatores intangíveis que dificilmente seriam capturados por meio de dados históricos.
+\end{itemize}
+
+É interesante pensar que a precisão de uma BBN está muito correlacionada com a topologia escolhida, parâmetros definidos e a elicitação de probabilidades. Em geral, uma rede Bayesiana é tão melhor quanto maior o embasamento teórico e empírico que a fundamenta. Nesse sentido, sempre que possível, deve-se optar por uma abordagem \emph{data‑driven}, que permite a construção de redes mais robustas e menos suscetíveis a vieses subjetivos. No entanto, em contextos onde os dados são limitados ou inexistem, a abordagem \emph{expert‑driven} se torna indispensável, especialmente em domínios como o aeroespacial, onde a disruptividade é uma característica intrínseca.
+
+Associado a isso, a dependência de especialistas para a definição dos parâmetros da rede pode introduzir vieses cognitivos e subjetividades, o que demanda um processo rigoroso de elicitação e validação. Isto não apenas demanda tempo e recursos, mas torna o processo moroso e com baixa precisão. A técnica de análise de riscos baseada em BBNs, portanto, apresenta uma adesão difícil em ambientes onde a agilidade é necessária. 
+
+Nesse cenário, a proposta deste trabalho é investigar como agentes baseados em LLMs (Large Language Models) podem automatizar a construção, parametrização e manutenção de BBNs, reduzindo custos e prazos associados à avaliação contínua de riscos. A ideia é que esses agentes possam aprender com dados históricos e interagir com especialistas para refinar as redes, tornando o processo mais eficiente e menos suscetível a erros humanos.
+
+
+
+
+
+
+
+\section{Elicitação de Probabilidades}
+\label{sec:elicitation}
+Quando se adotam modelos \emph{expert‑driven}, a \textbf{elicitação de probabilidades} se torna uma etapa crítica. Trata‑se do processo sistemático de extrair e quantificar o julgamento de especialistas sobre a incerteza dos eventos definidos e suas interrelações, traduzindo essas crenças em valores numéricos que alimentam as Tabelas de Probabilidade Condicional (CPTs) da rede. Esse processo pode ser organizado em quatro fases principais:
+
+\begin{enumerate}
+  \item \textbf{Definição de estados e escalas} — Primeiramente, é necessário definir os estados das variáveis, que podem ser qualitativos (por exemplo, “baixo”, “médio”, “alto”) ou quantitativos. A escolha da escala deve refletir a natureza do risco avaliado e facilitar a interpretação dos resultados.
+
+  \item \textbf{Coleta de julgamentos} — Utilizam-se métodos estruturados, como entrevistas semiestruturadas e questionários padronizados, para coletar as estimativas dos especialistas. É importante minimizar vieses cognitivos, por meio de procedimentos que incentivem a reflexão e a consideração de cenários alternativos. 
+
+  \item \textbf{Agregação de opiniões} — Dada a possibilidade de divergência entre os especialistas, é comum aplicar métodos estatísticos ou algoritmos de agregação para consolidar as estimativas individuais em um único conjunto de parâmetros que alimentará as CPTs da rede. Neste momento, métodos como o \emph{Delphi} ou o \emph{DEMATEL} podem ser empregados \cite{delphi,dematel}.
+
+  \item \textbf{Validação e análise de sensibilidade} — Após a elicitação, as probabilidades obtidas são comparadas com dados disponíveis (quando possíveis) ou submetidas a análises de sensibilidade. Esse processo permite identificar inconsistências e ajustar os parâmetros, aumentando a robustez do modelo.
+\end{enumerate}
+
+Tais etapas costumam ser guiadas por protocolos formais, como o método de Julgamento Estruturado de Cooke, que quantifica a calibração e a informação de cada especialista antes de atribuir pesos em sua agregação. Em projetos aeroespaciais, essa prática atende a requisitos de rastreabilidade e auditoria impostos por órgãos certificadores, garantindo transparência sobre a origem de cada valor probabilístico.
+
+No domínio aeroespacial, a complexidade dos sistemas e a ocorrência de eventos raros tornam esse procedimento ainda mais relevante, pois assegura que fatores não capturados em dados históricos sejam contemplados, aumentando a robustez das estratégias de mitigação.
+
+
+
+
+
+
+% TODO: AVALIAR SE QUERO MANTER ISSO AQUI
+
+\subsection{Comparação com Outras Técnicas de Análise de Risco}
+A literatura especializada frequentemente compara BBNs com métodos como Análise de Modos e Efeitos de Falha (FMEA), Árvores de Falha (FTA) e simulação de Monte Carlo. Enquanto a FMEA foca em identificar modos de falha isolados e a FTA privilegia relações lógicas booleanas, as BBNs oferecem um meio termo entre a formalidade lógica e a representação probabilística, permitindo capturar dependências condicionais que não são tratadas nos modelos tradicionais. Em testes conduzidos por \cite{marcot2012future}, BBNs reduziram o erro absoluto médio na estimativa de risco em 18 \% em comparação com modelos baseados exclusivamente em Monte Carlo, demonstrando potencial para complementar—notadamente não substituir—técnicas consagradas.
+
+% ----------------------------------------------------------------
+\section{Large Language Models (LLMs)}
+\label{sec:llms}
+
+Os \textbf{Large Language Models} (LLMs) são modelos estatísticos de linguagem treinados sobre coleções massivas de texto para aprender distribuições condicionais de palavras e frases dado o contexto apresentado. A partir dessa capacidade, são capazes de gerar, resumir e interpretar linguagem natural com coerência em larga escala, sendo hoje a base em aplicações conversacionais e de sistemas de \emph{Retrieval‑Augmented Generation} (RAG) \cite{IBM2023LLM}.
+
+\subsection{Agentes de IA Baseados em LLMs}
+\label{subsec:agentes_llm}
+
+Um \emph{agente de IA} é uma instância de software que combina um LLM com ferramentas externas (APIs, bancos de dados, planejadores) para realizar ações autônomas em um ambiente. Enquanto o LLM provê a competência linguística — compreensão de instruções e geração de texto — o agente adiciona \emph{raciocínio dirigido a objetivos}, memória de longo prazo e capacidade de executar chamadas de função. Em outras palavras, todo LLM pode ser o núcleo de um agente, mas nem todo agente se limita a responder em linguagem natural; ele coordena passos, verifica pré‑condições e decide quando invocar heurísticas clássicas \cite{IBM2023AGENTES}.
+
+No contexto deste trabalho, agentes baseados em LLMs serão empregados para automatizar tarefas de construção, parametrização e atualização de BBNs, reduzindo dependência de especialistas humanos e acelerando a iteração de modelos de risco.
+
+\subsection{Treinamento de LLMs: Corpus e Estratégias}
+\label{subsec:treino_llm}
+
+O treinamento de um LLM ocorre em duas grandes etapas:
+
+\begin{enumerate}
+  \item \textbf{Pré‑treinamento} (\emph{pre‑training}) — O modelo é exposto a um corpus de ordem de terabytes (livros, artigos, códigos‑fonte, documentações técnicas). O objetivo é minimizar a \emph{perplexidade} na previsão da próxima palavra, aprendendo representações semânticas gerais de linguagem.
+  
+  \item \textbf{Ajuste fino} (\emph{fine‑tuning}) — O modelo é refinado em domínios específicos utilizando conjuntos de dados menores porém curados (por exemplo, procedimentos da NASA, relatórios de anomalias ou normas da ESA). Técnicas complementares, como \emph{Reinforcement Learning from Human Feedback} (RLHF) e \emph{instruction tuning}, alinham as respostas a valores de qualidade, segurança e utilidade \cite{ouyang2022training}.
+\end{enumerate}
+
+Para aplicações aeroespaciais, recomenda‑se um \emph{fine‑tuning} supervisionado sobre:
+
+\begin{itemize}
+  \item relatórios de falhas históricas e lições aprendidas (\emph{Lessons Learned});
+  \item manuais de requisitos técnicos (ex.\ NPRs da NASA e ECSS da ESA);
+  \item publicações científicas e teses sobre análise de riscos;
+  \item transcriptos de revisões (\emph{Design Reviews}) previamente gravadas.
+\end{itemize}
+
+Esse material garante que o modelo incorpore terminologia e raciocínios específicos, melhorando a extração de variáveis, causas e relações para alimentar BBNs.
+
+% ----------------------------------------------------------------
+\section{Método DEMATEL}
+\label{sec:dematel}
+
+O \emph{Decision Making Trial and Evaluation Laboratory} (DEMATEL) é uma técnica estruturada para identificar e quantificar relações de causa‑efeito em sistemas complexos \cite{fontela1976dematel}. A partir de matrizes de influência avaliadas por especialistas, o método produz um grafo digirido ponderado que distingue fatores de \emph{causa} e \emph{efeito}, bem como o grau de interdependência entre eles.
+
+\subsection{Integração do DEMATEL às Probabilidades de uma BBN}
+\label{subsec:dematel_bbn}
+
+O DEMATEL pode servir como passo intermediário à construção ou refinamento de uma BBN de duas formas:
+
+\begin{enumerate}
+  \item \textbf{Definição da topologia inicial}: os arcos identificados como de maior influência pela matriz total de relações (soma direta + indireta) orientam a criação dos enlaces causais do DAG, reduzindo a subjetividade na escolha das conexões.
+
+  \item \textbf{Alimentação probabilística}: os valores normalizados da matriz de influência podem ser mapeados para probabilidades condicionais iniciais das CPTs, funcionando como priors quando dados empíricos são escassos. Posteriormente, essas probabilidades podem ser calibradas por métodos Bayesianos à medida que dados observacionais fiquem disponíveis.
+\end{enumerate}
+
+Esse casamento entre DEMATEL e BBN preserva a interpretabilidade do julgamento de especialistas — explícito na matriz de influência — ao mesmo tempo em que o converte em parâmetros compatíveis com inferência probabilística, criando um pipeline coerente de elicitação de conhecimento.
