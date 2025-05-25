@@ -1,4 +1,4 @@
-# Desenvolvimento de Cimento Ativado Alcalinamente Monocomponente
+# Análise de Riscos de Projetos Aeroespaciais em uma abordagem Bayesiana
 
 > Baseado no Template Thesis ITA ABNT NBR 6023:2018
 > 
@@ -8,9 +8,9 @@
 
 ## Resumo do Trabalho
 
-Este trabalho apresenta o desenvolvimento de um cimento ativado alcalinamente monocomponente com foco em precursores sólidos de baixo teor de cálcio. A pesquisa utiliza principalmente metacaulim e sílica ativa, combinados com fontes alcalinas alternativas mais seguras e acessíveis, como carbonato de potássio (K₂CO₃) e hidróxido de cálcio (Ca(OH)₂).
+Este trabalho apresenta uma metodologia de análise de riscos de projetos aeroespaciais utilizando uma abordagem bayesiana, via Bayesian Belief Networks (BBNs). A pesquisa explora como modelos probabilísticos podem ser aplicados para identificar, avaliar e mitigar riscos em diferentes fases do ciclo de vida de projetos aeroespaciais. Em especial a partir da automação de agentes baseados em LLMs (Large Language Models) para auxiliar na elucidação de probabilidades, topologia de rede e atualizações de estados de risco.
 
-A abordagem visa contribuir para a formulação de ligantes mais sustentáveis, seguros e com desempenho adequado para aplicações na construção civil, alinhando-se às diretrizes contemporâneas de construção de baixo impacto ambiental.
+A abordagem visa fornecer uma ferramenta robusta para a tomada de decisões informadas, contribuindo para a segurança e eficiência de projetos complexos na indústria aeroespacial.
 
 ## Estrutura do Projeto
 
