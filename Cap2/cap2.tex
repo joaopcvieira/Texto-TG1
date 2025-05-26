@@ -1,6 +1,7 @@
 Este capítulo apresenta os fundamentos que sustentam o emprego de \textbf{Redes Bayesianas de Crenças (\emph{Bayesian Belief Networks} — BBNs)} na mitigação de riscos em projetos aeroespaciais e descreve os procedimentos de elicitação de probabilidades utilizados na modelagem desses riscos. A abordagem adotada integra tanto conhecimentos teóricos extraídos da literatura quanto práticas de engenharia fundamentadas na experiência com análise de riscos em ambientes de alta complexidade e incerteza.
 
 
+// [MermaidChart: 77f67e7b-edba-4a19-96c5-2f26dc29cb8f]
 % ALTERAR ISSO AQUI
 Nos últimos vinte anos, a indústria aeroespacial testemunhou incidentes emblemáticos—como os acidentes do *Mars Climate Orbiter* (1999) e do *Ariane 5* Flight 501 (1996)—que evidenciaram a necessidade de sistemas formais de avaliação de risco capazes de abarcar tanto incertezas epistemológicas quanto variabilidades aleatórias. Nesse contexto, modelos probabilísticos estruturados, como as BBNs, tornaram‑se ferramentas centrais em organizações como a NASA, a ESA e a JAXA, pois permitem integrar conhecimentos provenientes de simulações, testes laboratoriais e julgamento de especialistas, entregando uma visão holística dos cenários de falha \cite{banerjee2020risk, nasa2022safety}.
 
@@ -135,7 +136,7 @@ No domínio aeroespacial, a complexidade dos sistemas e a ocorrência de eventos
 \subsection{Comparação com Outras Técnicas de Análise de Risco}
 A literatura especializada frequentemente compara BBNs com métodos como Análise de Modos e Efeitos de Falha (FMEA), Árvores de Falha (FTA) e simulação de Monte Carlo. Enquanto a FMEA foca em identificar modos de falha isolados e a FTA privilegia relações lógicas booleanas, as BBNs oferecem um meio termo entre a formalidade lógica e a representação probabilística, permitindo capturar dependências condicionais que não são tratadas nos modelos tradicionais. Em testes conduzidos por \cite{marcot2012future}, BBNs reduziram o erro absoluto médio na estimativa de risco em 18 \% em comparação com modelos baseados exclusivamente em Monte Carlo, demonstrando potencial para complementar—notadamente não substituir—técnicas consagradas.
 
-% ----------------------------------------------------------------
+
 \section{Large Language Models (LLMs)}
 \label{sec:llms}
 
@@ -170,16 +171,16 @@ Para aplicações aeroespaciais, recomenda‑se um \emph{fine‑tuning} supervis
 
 Esse material garante que o modelo incorpore terminologia e raciocínios específicos, melhorando a extração de variáveis, causas e relações para alimentar BBNs.
 
-% ----------------------------------------------------------------
+
+
+
 \section{Método DEMATEL}
 \label{sec:dematel}
 
-O \emph{Decision Making Trial and Evaluation Laboratory} (DEMATEL) é uma técnica estruturada para identificar e quantificar relações de causa‑efeito em sistemas complexos \cite{fontela1976dematel}. A partir de matrizes de influência avaliadas por especialistas, o método produz um grafo digirido ponderado que distingue fatores de \emph{causa} e \emph{efeito}, bem como o grau de interdependência entre eles.
+O \emph{Decision Making Trial and Evaluation Laboratory} (DEMATEL) é uma técnica estruturada para identificar e quantificar relações de causa‑efeito em sistemas complexos \cite{tgJulio}. A partir de matrizes de influência avaliadas por especialistas, o método produz um grafo digirido ponderado que distingue fatores de \emph{causa} e \emph{efeito}, bem como o grau de interdependência entre eles.
 
-\subsection{Integração do DEMATEL às Probabilidades de uma BBN}
-\label{subsec:dematel_bbn}
 
-O DEMATEL pode servir como passo intermediário à construção ou refinamento de uma BBN de duas formas:
+\ O DEMATEL pode servir como passo intermediário à construção ou refinamento de uma BBN de duas formas:
 
 \begin{enumerate}
   \item \textbf{Definição da topologia inicial}: os arcos identificados como de maior influência pela matriz total de relações (soma direta + indireta) orientam a criação dos enlaces causais do DAG, reduzindo a subjetividade na escolha das conexões.
@@ -188,3 +189,22 @@ O DEMATEL pode servir como passo intermediário à construção ou refinamento d
 \end{enumerate}
 
 Esse casamento entre DEMATEL e BBN preserva a interpretabilidade do julgamento de especialistas — explícito na matriz de influência — ao mesmo tempo em que o converte em parâmetros compatíveis com inferência probabilística, criando um pipeline coerente de elicitação de conhecimento.
+
+O procedimento clássico compreende cinco passos \cite{tgJulio,kaya2017}:
+
+\begin{enumerate}
+  \item \textbf{Matriz de relações diretas ($A$)} — cada especialista atribui notas de $0$ (sem influência) a $3$ (alta influência) para representar o impacto de uma variável sobre outra; a média das avaliações compõe $A$.
+  \item \textbf{Normalização} — obtém‑se a matriz normalizada $M$ dividindo‑se todos os elementos de $A$ pelo maior valor entre a soma máxima das linhas ou das colunas:
+  \begin{equation}
+    M = A \times \min\!\Bigl(\frac{1}{\max_i \sum_j a_{ij}},\; \frac{1}{\max_j \sum_i a_{ij}}\Bigr).
+  \end{equation}
+  \item \textbf{Relações totais} — calcula‑se a matriz de relações totais
+  \begin{equation}
+    T = M \left(I - M\right)^{-1},
+  \end{equation}
+  que agrega influências diretas e indiretas.
+  \item \textbf{Índices de proeminência e relação causa–efeito} — somam‑se as linhas ($R$) e colunas ($C$) de $T$; $R+C$ mede a \emph{proeminência} de cada fator, enquanto $R-C>0$ indica fator de causa e $R-C<0$ indica fator de efeito.
+  \item \textbf{Diagrama causal} — define‑se um limiar, com apoio dos especialistas, para filtrar as influências menos significativas; os arcos restantes formam o grafo causa‑efeito que servirá de base ou ajuste para a BBN.
+\end{enumerate}
+
+O Trabalho de Graduação (TG) de Júlio \cite{tgJulio} apresenta exemplos práticos de aplicação do DEMATEL para montar redes BBNs baseadas em julgamentos de especialistas. A proposta desse trabalho, de certa maneira, busca estender essa abordagem, propondo uma forma de automatizar a elicitação de probabilidades e a construção de BBNs, reduzindo o tempo e o custo associados ao processo.

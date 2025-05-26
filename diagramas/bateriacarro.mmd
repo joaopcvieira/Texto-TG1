@@ -1,0 +1,33 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: ''
+    fontSize: 14px
+  flowchart:
+    curve: linear
+id: 77f67e7b-edba-4a19-96c5-2f26dc29cb8f
+---
+flowchart TD
+    BCar["`Bateria do Carro <hr>
+        OK    30%
+        NOK    70%`"]
+    BKey["`Bateria da Chave <hr>
+        OK    100%
+        NOK    0%`"] 
+    Windows["`Janelas Abaixarem? <hr>
+        Sim     0%
+        Não     100%`"]
+    Start["`Carro  Ligar? <hr>
+        Sim  30%
+        Não  70%`"]
+
+    BCar -->Windows & Start
+    BKey --> Windows
+    BCar:::battery
+    Windows:::effect2
+    Start:::effect
+    BKey:::battery
+    classDef battery fill:#FDEBD0,stroke:#E59866,stroke-width:2px,rx:6,ry:6,color:#5B341C
+    classDef effect  fill:#D6EAF8,stroke:#5DADE2,stroke-width:2px,rx:6,ry:6,color:#123B66
+    classDef effect2  fill:#ffe6e6,stroke:#A52A2A,stroke-width:2px,rx:6,ry:6,color:#123B66
